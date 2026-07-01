@@ -13,11 +13,11 @@ const UpdateBook = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (id ) {
-      const singleBook = books.find((ele) => ele.Bookid === id);
-      setUpdate(singleBook);
+    if (id) {
+      const singleBook = books.find((ele) => String(ele.id ?? ele.Bookid) === String(id));
+      setUpdate(singleBook ? { ...singleBook } : null);
     }
-  }, []);
+  }, [id, books]);
   if(loading){
     return(<div className=''>
                 <Navbar />
@@ -30,20 +30,27 @@ const UpdateBook = () => {
   }
 
   const newData = (event) => {
+    const { name, value } = event.target;
     setUpdate({
       ...updateData,
-      [event.target.name]: event.target.value,
+      [name]: name === 'total_copies' ? Number(value) : value
     });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    dispatch(updateBook(updateData))
-    navigate("/Books");
+    try {
+      await dispatch(updateBook(updateData)).unwrap();
+      navigate("/Books");
+      alert("Book updated successfully")
+    } catch (submitError) {
+      setError(submitError || 'Failed to update book');
+    }
   };
 
   if (!updateData) {
     return (
+      
       <div className="fixed inset-0 flex items-center justify-center bg-black/40 p-5">
         <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
           <h2 className="mb-2 text-lg font-semibold text-gray-800">Update Book</h2>
@@ -62,9 +69,9 @@ const UpdateBook = () => {
 
   return (
     <div>
-        <Navbar/>
-      <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-5">
-      <div className='bg-white rounded-xl w-full  max-w-md p-5 shadow-xl'>
+        {/* <Navbar/> */}
+      <div className="fixed inset-0 z-5 flex items-center justify-center bg-black/40 p-4 animate-fadeIn">
+      <div className='w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl transition-all duration-300'>
 
         {/* Header of form */}
         <div className='flex justify-between items-center mb-5'>
@@ -87,8 +94,8 @@ const UpdateBook = () => {
               <input type='text'
               placeholder='e.g: Programming Language'
               className='w-full bg-blue-50 p-2 rounded-lg'
-              name='BookName'
-              value={updateData&& updateData?.BookName || ''}
+              name='title'
+              value={updateData&& updateData?.title || ''}
               onChange={newData}
               />
               
@@ -98,8 +105,8 @@ const UpdateBook = () => {
               <input type='text'
               placeholder='e.g: Brendan Eich'
               className='w-full bg-blue-50 p-2 rounded-lg'
-              name='Author'
-              value={updateData&& updateData?.Author || ''}
+              name='author'
+              value={updateData&& updateData?.author || ''}
               onChange={newData}
               />
               
@@ -109,8 +116,19 @@ const UpdateBook = () => {
               <input type='text'
               placeholder='e.g: 15'
               className='w-full bg-blue-50 p-2 rounded-lg'
-              name='Quantity'
-              value={updateData&& updateData?.Quantity || ''}
+              name='total_copies'
+              value={updateData&& updateData?.total_copies || ''}
+              onChange={newData}
+              />
+              
+            </label>
+            <label className=''>
+              ISBN
+              <input type='text'
+              placeholder='e.g: 15'
+              className='w-full bg-blue-50 p-2 rounded-lg'
+              name='isbn'
+              value={updateData&& updateData?.isbn || ''}
               onChange={newData}
               />
               

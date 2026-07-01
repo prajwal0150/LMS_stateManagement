@@ -7,7 +7,7 @@ import {FaEdit, FaEye, FaTrash} from 'react-icons/fa';
 import AddBook from '../components/AddBook';
 import BookView from '../components/BookView';
 import { useNavigate } from 'react-router-dom';
-import UpdateBook from '../components/updateBook';
+import UpdateBook from '../components/UpdateBook';
 
 const Dashboard = () => {
     
@@ -24,8 +24,10 @@ const Dashboard = () => {
     
     },[]);
 
-    const openEditPage = (bookId) => {
-      navigate(`/Books/edit/${bookId}`);
+    
+
+    const openEditPage = (id) => {
+      navigate(`/Books/edit/${id}`);
     };
 
  if (loading) {
@@ -91,37 +93,70 @@ const Dashboard = () => {
                 <td className="px-4 py-2">Actions</td>
               </tr>
             </thead>
-            <tbody>
-              {books.map((item, index)=>{
-                return(
-                  <tr key={index}>
-                    <td className='px-4 py-2'>{index+1}</td>
-                    <td className='px-4 py-2'>{item.BookName}</td>
-                    <td className='px-4 py-2'>{item.Author}</td>
-                    <td className="px-4 py-2">{item.Quantity}</td>
-                    <td className='px-4 py- flex gap-3'>
-                      <FaEdit
-                      title="Edit Book"
-                      className="cursor-pointer text-green-500 hover:text-green-700 mt-3"
-                      onClick={() => openEditPage(item.Bookid)}
-                     />
+                        <tbody>
+                            {Array.isArray(books) && books.length > 0 ? (
+                                books.map((item, index) => {
+                                    // const bookId = item.id || item.Bookid;
+                                    // const bookTitle = item.title || item.BookName;
+                                    // const bookAuthor = item.author || item.Author;
+                                    // const bookQuantity = item.total_copies !== undefined ? item.total_copies : item.total_copies;
 
-                      <FaTrash
-                      title="Delete Book"
-                      className="cursor-pointer text-red-500 hover:text-red-700 mt-3"
-                      onClick={()=> dispatch(deleteBook(item.Bookid))}
-              />
+                                    return (
+                                        <tr key={item.id || index} className="hover:bg-slate-50/80 transition-colors">
+                                            <td className='px-4 py-2 font-medium '>{index + 1}</td>
+                                            <td className='px-4 py-2 font-semibold '>{item.title}</td>
+                                            <td className='px-4 py-2 '>{item.author}</td>
+                                            <td className="px-4 py-2 ">
+                                                <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${item.total_copies > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                                                    {item.total_copies} Available
+                                                </span>
+                                            </td>
+                                            <td className='px-6 py-4 flex gap-4 '>
+                                                <button 
+                                                    onClick={() => openEditPage(item.id)}
+                                                    className=" hover:text-blue-600 rounded-lg hover:bg-blue-50 transition"
+                                                    title="Edit Book"
+                                                >
+                                                    <FaEdit className="cursor-pointer text-green-500 hover:text-green-700" />
+                                                </button>
 
-                      <FaEye
-                      title="View Book"
-                      onClick={()=>[setId(item.Bookid), setPopup(true)]}
-                      className="cursor-pointer text-yellow-500 mt-3 hover:text-yellow-700 inline-flex items-center justify-center rounded-2xl  text-sm font-semibold transition"
-/>
-                    </td>
-                  </tr>
-                )
-              })} 
-            </tbody>
+                                                
+                        <FaTrash
+                        title="Delete Book"
+                        onClick={async () => {
+                          if (window.confirm("Are you sure you want to delete this book?")) {
+                            try {
+                              await dispatch(deleteBook(item.id));
+                              alert("Book deleted successfully!");
+                              // Refresh the books list to reflect deletion
+                              dispatch(showBooks());
+                            } catch (err) {
+                              alert(`Deletion failed: ${err}`);
+                            }
+                          }
+                        }}
+                        className="cursor-pointer text-red-500 hover:text-red-700" />
+                                               
+
+                                                <button 
+                                                  onClick={() => { setId(item.id); setPopup(true); }}
+                                                    className="  hover:text-amber-600 rounded-lg hover:bg-amber-50 transition"
+                                                  title="View Book"
+                                                >
+                                                  <FaEye className="cursor-pointer text-yellow-500 hover:text-yellow-700 inline-flex items-center justify-center rounded-2xl  text-sm font-semibold transition" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="text-center py-12 text-slate-400 font-medium bg-slate-50/30">
+                                        No books available in the catalog.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
           </table>
 
           

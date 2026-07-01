@@ -10,18 +10,27 @@ export default function AddBook({ onClose}) {
     const navigate=useNavigate();
     
     const getBookData=(e)=>{
-        setBook({...book,[e.target.name]:e.target.value})
+      const value = e.target.type === 'number' ? Number(e.target.value) : e.target.value;
+        setBook({ ...book, [e.target.name]: value });
     }
 
     const handleSubmit=(e)=>{
         e.preventDefault();
-        if (!book.BookName || !book.Author || !book.Quantity) {
+        if (!book.title || !book.author || !book.isbn ||!book.total_copies) {
           setError('All fields are required');
           return;
         }
-      
-        dispatch(addBook(book));
+        try{
+          dispatch(addBook(book));
+          onClose();
+          alert("Book add succeed.")
         navigate("/Books");
+
+        }catch(error){
+            setError(error || "Failed to create book record on server.");
+        }
+      
+        
 
     }
     
@@ -51,7 +60,7 @@ export default function AddBook({ onClose}) {
               <input type='text'
               placeholder='e.g: Programming Language'
               className='w-full bg-blue-50 p-2 roundend-lg'
-              name='BookName'
+              name='title'
               onChange={getBookData}
               />
               
@@ -61,7 +70,7 @@ export default function AddBook({ onClose}) {
               <input type='text'
               placeholder='e.g: Brendan Eich'
               className='w-full bg-blue-50 p-2 roundend-lg'
-              name='Author'
+              name='author'
               onChange={getBookData}
               />
               
@@ -71,7 +80,17 @@ export default function AddBook({ onClose}) {
               <input type='text'
               placeholder='e.g: 15'
               className='w-full bg-blue-50 p-2 roundend-lg'
-              name='Quantity'
+              name='total_copies'
+              onChange={getBookData}
+              />
+              
+            </label>
+            <label className=''>
+              ISBN
+              <input type='text'
+              placeholder='e.g: 15'
+              className='w-full bg-blue-50 p-2 roundend-lg'
+              name='isbn'
               onChange={getBookData}
               />
               

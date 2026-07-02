@@ -27,6 +27,15 @@ const Borrow = () => {
     return books.find((book) => String(book.id ?? book.Bookid) === String(logBookId)) ?? null
   }
 
+  const formatDateTime = (value) => {
+    if (!value) {
+      return 'N/A'
+    }
+
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? 'N/A' : date.toLocaleString()
+  }
+
   const handleBorrowSubmit = async (event) => {
     event.preventDefault()
     setError('')
@@ -184,11 +193,11 @@ const Borrow = () => {
                       </p>
                     ) : null}
                     <p>
-                      <span className="font-medium text-slate-900">Borrowed At:</span> {borrowedAt ? new Date(borrowedAt).toLocaleString() : 'N/A'}
+                      <span className="font-medium text-slate-900">Borrowed At:</span> {formatDateTime(borrowedAt)}
                     </p>
                     {returnedAt ? (
                       <p>
-                        <span className="font-medium text-slate-900">Return Date:</span> {new Date(log.returnedAt).toLocaleString()}
+                        <span className="font-medium text-slate-900">Return Date:</span> {formatDateTime(returnedAt)}
                       </p>
                     ) : null}
                   </div>

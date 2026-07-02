@@ -63,6 +63,11 @@ const Borrow = () => {
 
     const normalizedBookId = String(bookId).trim()
 
+    if (!/^\d+$/.test(normalizedBookId)) {
+      setError('only should be use number')
+      return
+    }
+
     if (!normalizedBookId) {
       setError('Book id is required.')
       return
@@ -163,8 +168,8 @@ const Borrow = () => {
                 value={bookId}
                 onChange={(event) => setBookId(event.target.value)}
                 placeholder="Enter book id"
-                inputMode="numeric"
-                pattern="[0-9]*"
+                
+               
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-sky-400 focus:bg-white"
               />
             </div>

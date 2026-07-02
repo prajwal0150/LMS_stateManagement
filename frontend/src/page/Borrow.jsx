@@ -22,6 +22,14 @@ const Borrow = () => {
 
   const allBorrowLogs = useMemo(() => loogs || [], [loogs])
 
+  const hasActiveBorrow = (bookIdValue) => {
+    return allBorrowLogs.some((log) => {
+      const logBookId = String(log?.book_id ?? log?.bookid ?? log?.Bookid)
+      const isReturned = Boolean(log?.is_returned ?? log?.returned_at ?? log?.returnedAt)
+      return logBookId === String(bookIdValue) && !isReturned
+    })
+  }
+
   const resolveBook = (log) => {
     const logBookId = log?.book_id ?? log?.bookid ?? log?.Bookid
     return books.find((book) => String(book.id ?? book.Bookid) === String(logBookId)) ?? null
@@ -34,6 +42,18 @@ const Borrow = () => {
 
     const date = new Date(value)
     return Number.isNaN(date.getTime()) ? 'N/A' : date.toLocaleString()
+  }
+
+  const getErrorMessage = (err, fallback) => {
+    if (typeof err === 'string' && err.trim()) {
+      return err
+    }
+
+    if (err?.message) {
+      return err.message
+    }
+
+    return fallback
   }
 
   const handleBorrowSubmit = async (event) => {
@@ -52,6 +72,11 @@ const Borrow = () => {
 
     if (!book) {
       setError('No book found for this id.')
+      return
+    }
+
+    if (hasActiveBorrow(normalizedBookId)) {
+      setError('You already borrowed this book.')
       return
     }
 
@@ -79,7 +104,7 @@ const Borrow = () => {
       setBookId('')
       alert('Borrow book successfully.')
     } catch (err) {
-      setError(err?.message || 'Failed to save borrow log.')
+      setError(getErrorMessage(err, 'Failed to save borrow log.'))
     }
   }
 
@@ -104,7 +129,7 @@ const Borrow = () => {
       await dispatch(fetchLogs()).unwrap()
       alert('Book returned successfully.')
     } catch (err) {
-      setError(err?.message || 'Failed to return book.')
+      setError(getErrorMessage(err, 'Failed to return book.'))
     }
   }
 
@@ -154,7 +179,6 @@ const Borrow = () => {
           {error ? <p className="mt-4 text-sm font-medium text-red-500">{error}</p> : null}
           {message ? <p className="mt-4 text-sm font-medium text-green-600">{message}</p> : null}
           {booksError ? <p className="mt-4 text-sm font-medium text-red-500">{booksError}</p> : null}
-          {logsError ? <p className="mt-2 text-sm font-medium text-red-500">{logsError}</p> : null}
           {/* {booksLoading ? <p className="mt-4 text-sm text-slate-500">Loading books...</p> : null} */}
         </section>
 

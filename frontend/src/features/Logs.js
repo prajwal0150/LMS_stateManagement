@@ -35,10 +35,10 @@ export const addLog = createAsyncThunk("logs/addLog", async ({ book_id, logForm 
             },
             body: JSON.stringify(logForm ?? { book_id })
         });
-        if (!response.ok) {
-            throw new Error("Failed to add log");
-        }
         const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result?.detail || "Failed to add log");
+        }
         return result;
     } catch (error) {
         return rejectWithValue(error.message || 'Failed to Add log');

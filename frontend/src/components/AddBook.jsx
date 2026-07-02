@@ -114,7 +114,7 @@ export default function AddBook({ onClose}) {
             </label>
             <label className=''>
               Quantity
-              <input type='number'
+              <input type=''
               placeholder='e.g: 15'
               className='w-full bg-blue-50 p-2 roundend-lg'
               name='total_copies'

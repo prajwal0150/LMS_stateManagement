@@ -56,7 +56,7 @@ export default function AddBook({ onClose}) {
               alert("Book added successfully.");
 
               onClose();
-              navigate("/Books");
+              // navigate("/Books");
 
           } catch (err) {
 

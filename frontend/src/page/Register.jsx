@@ -20,26 +20,76 @@ const Register = () => {
     //get user data from the input field and set data in user variable
     const userData=(e)=>{
         setUser({...user, [e.target.name]:e.target.value})
-    }
 
+    }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const nameRegex = /^[A-Za-z]+$/;
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     //submit create user event
-    const submitRegister= async (e)=>{
-        e.preventDefault();
-        seClientError(null);
+    const submitRegister = async (e) => {
+    e.preventDefault();
 
-        if(!user.FirstName|| !user.LastName|| !user.Email||!user.Password||!user.UserName){
-            setregError("All field are required for register!")
-            return;
-        }
-        try{
-          await dispatch(register(user)).unwrap();
-          alert("User registration is successful.");
-          navigate("/User/Login");
-        }catch(err){
-          console.error("Registration failed:", err);
-          alert("Registration failed: " + (err || "Check your details and try again."));
-        }
-    }
+            seClientError(null);
+            setregError(null);
+
+            if (
+                !user.FirstName ||
+                !user.LastName ||
+                !user.Email ||
+                !user.Password ||
+                !user.UserName
+            ) {
+                setregError("All fields are required.");
+                return;
+            }
+
+            // First name validation
+            if (!nameRegex.test(user.FirstName)) {
+                setregError("First name should contain only letters.");
+                return;
+            }
+
+            // Last name validation
+            if (!nameRegex.test(user.LastName)) {
+                setregError("Last name should contain only letters.");
+                return;
+            }
+
+            // Email validation
+            if (!emailRegex.test(user.Email)) {
+                setregError("Please enter a valid email address.");
+                return;
+            }
+
+            // Password validation
+            if (!passwordRegex.test(user.Password)) {
+                setregError(
+                    "Password must be at least 8 characters long and contain at least one letter and one number."
+                );
+                return;
+            }
+
+            try {
+                await dispatch(register(user)).unwrap();
+
+                alert("User registration is successful.");
+                navigate("/User/Login");
+
+            } catch (err) {
+
+                
+                if (
+                    err?.toLowerCase().includes("email") &&
+                    err?.toLowerCase().includes("exist")
+                ) {
+                    setregError("Email already exists.");
+                } else {
+                    setregError(err || "Registration failed.");
+                }
+
+                console.error(err);
+            }
+        };
 
 
   return (

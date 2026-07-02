@@ -9,31 +9,67 @@ export default function AddBook({ onClose}) {
     const dispatch=useDispatch();
     const navigate=useNavigate();
     
-    const getBookData=(e)=>{
-      const value = e.target.type === 'number' ? Number(e.target.value) : e.target.value;
-        setBook({ ...book, [e.target.name]: value });
-    }
+        const getBookData = (e) => {
+        setBook({
+            ...book,
+            [e.target.name]: e.target.value,
+            });
+            };
 
+    const titleRegex = /^[A-Za-z\s]+$/;
+    const numberRegex = /^\d+$/;
     const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!book.title || !book.author || !book.isbn || !book.total_copies) {
-        setError("All fields are required");
-        return;
-    }
+    setError(null);
 
-    try {
-        await dispatch(addBook(book)).unwrap();
+          if (
+              !book.title ||
+              !book.author ||
+              !book.isbn ||
+              !book.total_copies
+          ) {
+              setError("All fields are required.");
+              return;
+          }
 
-        alert("Book added successfully.");
+          // Book title validation
+          if (!titleRegex.test(book.title)) {
+              setError("Book title should contain only letters and spaces.");
+              return;
+          }
 
-        onClose();
-        navigate("/Books");
+          // Quantity validation
+          if (!numberRegex.test(book.total_copies)) {
+              setError("Quantity must contain only numbers.");
+              return;
+          }
 
-    } catch (error) {
-        setError(error || "Failed to create book record on server.");
-    }
-    };
+          try {
+              await dispatch(
+                  addBook({
+                      ...book,
+                      total_copies: Number(book.total_copies),
+                  })
+              ).unwrap();
+
+              alert("Book added successfully.");
+
+              onClose();
+              navigate("/Books");
+
+          } catch (err) {
+
+              if (
+                  err?.toLowerCase().includes("exist") ||
+                  err?.toLowerCase().includes("already")
+              ) {
+                  setError("Book title already exists.");
+              } else {
+                  setError(err || "Failed to create book.");
+              }
+          }
+      };
     
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-5">
@@ -78,7 +114,7 @@ export default function AddBook({ onClose}) {
             </label>
             <label className=''>
               Quantity
-              <input type='text'
+              <input type='number'
               placeholder='e.g: 15'
               className='w-full bg-blue-50 p-2 roundend-lg'
               name='total_copies'

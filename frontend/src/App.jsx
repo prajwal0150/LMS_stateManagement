@@ -4,6 +4,7 @@ import Landing from './page/Landing';
 import Dashboard from './page/Dashboard';
 import AddBook from './components/AddBook';
 import UpdateBook from './components/UpdateBook';
+import Borrow from './page/Borrow';
 import Register from './page/Register';
 import Login from './page/Login';
 import ProtectedRouter from './components/ProtectedRouter';
@@ -23,6 +24,7 @@ const App = () => {
             <Route path="/Books" element={<Dashboard/>}/>
             <Route path="/BooksAdd" element={<AddBook/>}/>
             <Route path="/Books/edit/:id" element={<UpdateBook/>}/>
+            <Route path="/borrow" element={<Borrow/>}/>
             </Route>
 
         </Routes>

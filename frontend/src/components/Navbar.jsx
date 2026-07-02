@@ -41,7 +41,7 @@ const Navbar = () => {
           >
             Books
           </Link>
-          <Link  className="text-slate-500 hover:text-slate-700">
+          <Link to="/borrow" className="text-slate-500 hover:text-slate-700">
             Logs
           </Link>
         </nav>

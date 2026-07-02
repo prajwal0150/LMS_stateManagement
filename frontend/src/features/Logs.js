@@ -33,7 +33,7 @@ export const addLog = createAsyncThunk("logs/addLog", async ({ book_id, logForm 
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             },
-            body: JSON.stringify(logForm)
+            body: JSON.stringify(logForm ?? { book_id })
         });
         if (!response.ok) {
             throw new Error("Failed to add log");
@@ -46,12 +46,14 @@ export const addLog = createAsyncThunk("logs/addLog", async ({ book_id, logForm 
 });
 
 // Return book log action 
-export const returnBookLog = createAsyncThunk("logs/returnBookLog", async ({ Bookid, logId, updatedLog }, { rejectWithValue }) => {
+export const returnBookLog = createAsyncThunk("logs/returnBookLog", async ({ Bookid, logId, updatedLog }, { getState,rejectWithValue }) => {
     try {
-        const response = await fetch(`${BASE_URL}${Bookid}/logs/${logId}`, {
-            method: "PUT",
+        const token = getState().auth.token;
+        const response = await fetch(`${BASE_URL}/return/ `, {
+            method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify(updatedLog)
         });

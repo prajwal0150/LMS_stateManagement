@@ -14,25 +14,26 @@ export default function AddBook({ onClose}) {
         setBook({ ...book, [e.target.name]: value });
     }
 
-    const handleSubmit=(e)=>{
-        e.preventDefault();
-        if (!book.title || !book.author || !book.isbn ||!book.total_copies) {
-          setError('All fields are required');
-          return;
-        }
-        try{
-          dispatch(addBook(book));
-          onClose();
-          alert("Book add succeed.")
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!book.title || !book.author || !book.isbn || !book.total_copies) {
+        setError("All fields are required");
+        return;
+    }
+
+    try {
+        await dispatch(addBook(book)).unwrap();
+
+        alert("Book added successfully.");
+
+        onClose();
         navigate("/Books");
 
-        }catch(error){
-            setError(error || "Failed to create book record on server.");
-        }
-      
-        
-
+    } catch (error) {
+        setError(error || "Failed to create book record on server.");
     }
+    };
     
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-5">

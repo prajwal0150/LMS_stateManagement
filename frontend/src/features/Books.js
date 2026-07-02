@@ -141,6 +141,9 @@ const BookDetail = createSlice({
         state.error = null;
       })
       .addCase(addBook.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+
         const exists = state.books.some(
           (book) => book.id === action.payload.id
         );
@@ -151,6 +154,7 @@ const BookDetail = createSlice({
       })
 
       .addCase(addBook.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       })
 

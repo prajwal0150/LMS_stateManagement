@@ -61,11 +61,16 @@ const Register = () => {
           <div className="flex justify-center w-full mb-6">
 
             <GoogleLogin
-              onSuccess={(res) => {
-                dispatch(loginwithgoogle(res.credential));
-                navigate("/Books");
-              }}
-              onError={() => console.log("Google Popup login failed")}
+              onSuccess={async (res) => {
+                try {
+                  await dispatch(loginwithgoogle(res.credential)).unwrap();
+                  alert("Login succced through the Google account")
+                  navigate("/Books", { replace: true });
+                } catch (err) {
+                  console.error(err);
+                }
+                  }}
+              onError={() => console.log("Google  login failed")}
 
               type="button"
               className="justify-center gap-3 border border-gray-300 rounded-xl py-3 text-gray-700 font-medium hover:bg-gray-50 transition duration-300"

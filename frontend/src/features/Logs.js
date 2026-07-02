@@ -2,9 +2,16 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const BASE_URL = "https://library-api-9h9j.onrender.com/api";
 // Read action 
-export const fetchLogs = createAsyncThunk("logs/fetchLogs", async (Bookid, { rejectWithValue }) => {
+export const fetchLogs = createAsyncThunk("logs/fetchLogs", async (Bookid, { getState, rejectWithValue }) => {
     try {
-        const response = await fetch(`${BASE_URL}/${Bookid}/my-borrows/`);
+              const token = getState().auth.token;
+
+        const response = await fetch(`${BASE_URL}/my-borrows/`,{
+            method:"GET",
+            headers:{
+                Authorization: `Bearer ${token}`
+            }
+        });
         if (!response.ok) {
             throw new Error("Failed to fetch logs");
         }
@@ -16,12 +23,15 @@ export const fetchLogs = createAsyncThunk("logs/fetchLogs", async (Bookid, { rej
 });
 
 // Add log action
-export const addLog = createAsyncThunk("logs/addLog", async ({ Bookid, logForm }, { rejectWithValue }) => {
+export const addLog = createAsyncThunk("logs/addLog", async ({ book_id, logForm }, {getState, rejectWithValue }) => {
     try {
-        const response = await fetch(`${BASE_URL}/${Bookid}/borrow/`, {
+         const token = getState().auth.token;
+
+        const response = await fetch(`${BASE_URL}/borrow/`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
             body: JSON.stringify(logForm)
         });

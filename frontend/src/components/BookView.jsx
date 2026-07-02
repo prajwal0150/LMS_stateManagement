@@ -6,13 +6,13 @@ import { fetchLogs, addLog, returnBookLog } from '../features/Logs'
 const BookView = ({id, popup, setpopup}) => {
     const dispatch = useDispatch()
     const allBooks = useSelector((state) => state.app.books)
-    const singleBook = allBooks.filter((ele) => String(ele.id ?? ele.Bookid) === String(id))
+    const singleBook = allBooks.filter((ele) => String(ele.id ?? ele.book_id) === String(id))
     const book = singleBook[0]
 
     const { loogs, loading: logsLoading, error: logsError } = useSelector((state) => state.logs)
 
     const [showAddForm, setShowAddForm] = useState(false)
-    const [adderName, setAdderName] = useState('')
+    const [bookid, setbookid] = useState('')
     const [error, setError] = useState(null)
 
     useEffect(() => {
@@ -26,8 +26,8 @@ const BookView = ({id, popup, setpopup}) => {
     const handleAddSubmit = async (e) => {
         e.preventDefault()
 
-        if (!adderName.trim()) {
-            setError("Adder name is required!")
+        if (!bookid) {
+            setError(" bookid is required!")
             return
         }
 
@@ -42,20 +42,18 @@ const BookView = ({id, popup, setpopup}) => {
 
             // Update book quantity first
             await dispatch(updateBook(updatedBook)).unwrap()
-
-            const logForm = {
-                BookId: book.Bookid,
-                AddName: adderName.trim(),
-                createdAt: new Date().toISOString(),
-                returnedAt: null,
+            console.log(book);
+           const logForm = {
+            book_id: book.id,   
+            createdAt: new Date().toISOString(),
+            returnedAt: null,
             }
 
             // Post log
-            await dispatch(addLog({ Bookid: book.Bookid, logForm })).unwrap()
-
+            await dispatch(addLog({ book_id: book.book_id, logForm })).unwrap()
             alert("Book added successfully!")
             setShowAddForm(false)
-            setAdderName("")
+            setbookid("")
             setError(null)
         } catch (err) {
             console.log('Failed to save.', err)
@@ -118,13 +116,13 @@ const BookView = ({id, popup, setpopup}) => {
                     {showAddForm ? (
                         <form className="mb-5 space-y-3 rounded-xl border border-sky-100 bg-sky-50 p-4 transition-all duration-300" onSubmit={handleAddSubmit}>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">Adder Name</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700">Bookk Id</label>
                                 <input
                                     type="text"
                                     className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 outline-none focus:border-sky-400"
                                     placeholder="Enter adder name"
-                                    value={adderName}
-                                    onChange={(e) => setAdderName(e.target.value)}
+                                    value={bookid}
+                                    onChange={(e) => setbookid(e.target.value)}
                                 />
                             </div>
 
@@ -170,7 +168,7 @@ const BookView = ({id, popup, setpopup}) => {
                                 <p className="text-sm text-gray-500 italic">No logs available for this book.</p>
                             )}
                             {loogs && loogs
-                                .filter((log) => log?.AddName && log?.createdAt)
+                                .filter((log) => log?.bookid && log?.createdAt)
                                 .map((log) => (
                                     <div key={log.id} className="rounded-xl border border-gray-100 bg-gray-50 p-3 text-sm text-gray-700">
                                         <div className="flex items-start justify-between gap-3">

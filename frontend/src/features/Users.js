@@ -73,7 +73,7 @@ export const loginwithgoogle = createAsyncThunk("auth/googleLogin", async (googl
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ token: googleCredentialToken }),
+            body: JSON.stringify({ id_token: googleCredentialToken }),
         });
         const result = await res.json();
         if (!res.ok) {

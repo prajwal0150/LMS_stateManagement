@@ -20,17 +20,18 @@ export const showBooks = createAsyncThunk("showBooks",async (_, { rejectWithValu
 );
 
 // add book
-export const addBook = createAsyncThunk("books/addBook",async (data, { getState, rejectWithValue }) => {
+export const addBook = createAsyncThunk("books/addBook",async (formDataPayload, { getState, rejectWithValue }) => {
     try {
       const token = getState().auth.token;
 
       const response = await fetch(`${BASE_URL}/books/`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          // "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(data),
+        // body: JSON.stringify(data),
+        body:formDataPayload,
       });
 
       const result = await response.json();
@@ -71,19 +72,20 @@ export const deleteBook = createAsyncThunk("deleteBook",async (bookId, { getStat
 );
 
 // update book
-export const updateBook = createAsyncThunk("updateBook",async (bookData, { getState, rejectWithValue }) => {
+export const updateBook = createAsyncThunk("updateBook",async ({id,formDataPayload}, { getState, rejectWithValue }) => {
     try {
       const token = getState().auth.token;
 
-      const bookId = bookData.id;
+      // const bookId = bookData.id;
 
-      const response = await fetch(`${BASE_URL}/books/${bookId}/`, {
+      const response = await fetch(`${BASE_URL}/books/${id}/`, {
         method: "PATCH",
         headers: {
-          "Content-Type": "application/json",
+          // "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(bookData),
+        // body: JSON.stringify(bookData),
+        body:formDataPayload,
       });
 
       const result = await response.json();

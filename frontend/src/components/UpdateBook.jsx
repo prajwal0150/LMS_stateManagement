@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-import { updateBook } from '../features/Books'
+import { showBooks, updateBook } from '../features/Books'
 import Navbar from './Navbar'
 
 const UpdateBook = () => {
@@ -12,14 +12,39 @@ const UpdateBook = () => {
   const [updateData, setUpdate] = useState(null);
   const [error, setError] = useState('');
 
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const fileInput = useRef(null);
+
+  useEffect(() => {
+    if (!Array.isArray(books) || books.length === 0) {
+      dispatch(showBooks());
+    }
+  }, [dispatch, books]);
+
   useEffect(() => {
     if (id) {
       const singleBook = books.find((ele) => String(ele.id ?? ele.Bookid) === String(id));
-      setUpdate(singleBook ? { ...singleBook } : null);
+      if (singleBook) {
+        setUpdate({ ...singleBook });
+        setPreview(singleBook.image || null); 
+      } else {
+        setUpdate(null);
+        setPreview(null);
+      }
     }
   }, [id, books]);
-  if(loading){
-    return(<div className=''>
+
+  useEffect(() => {
+    return () => {
+      if (preview && preview.startsWith('blob:')) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
+
+  if (loading) {
+    return (<div className=''>
                 <Navbar />
 
                 <div className='bg-white min-h-screen p-6 flex flex-col items-center justify-center gap-4'>
@@ -36,17 +61,49 @@ const UpdateBook = () => {
       [name]: name === 'total_copies' ? Number(value) : value
     });
   };
+  const handlefileChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFile=e.target.files[0];
+
+      const imageTypes=['image/png', 'image/jpeg', 'image/jpg'];
+      if (!imageTypes.includes(selectedFile.type)) {
+        setError("Invalid format. Only PNG, JPG, and JPEG images are permitted.");
+        setFile(null);
+        if (fileInput.current) fileInput.current.value = null;
+        return;
+      }
+      setError('');
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
+    }
+  }
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setError('');
+     if (!updateData?.title || !updateData?.author || !updateData?.isbn || updateData?.total_copies === undefined) {
+      setError("All text fields are required.");
+      return;
+    }
+
+    const formDataPayload = new FormData();
+    formDataPayload.append('title', updateData.title);
+    formDataPayload.append('author', updateData.author);
+    formDataPayload.append('isbn', updateData.isbn);
+    formDataPayload.append('total_copies', Number(updateData.total_copies));
+    
+    if (file) {
+      formDataPayload.append('image', file);
+    }
     try {
-      await dispatch(updateBook(updateData)).unwrap();
+      await dispatch(updateBook({ id: Number(id), formDataPayload })).unwrap();
+      alert("Book updated successfully.");
       navigate("/Books");
-      alert("Book updated successfully")
     } catch (submitError) {
       setError(submitError || 'Failed to update book');
     }
   };
+    
 
   if (!updateData) {
     return (
@@ -131,6 +188,27 @@ const UpdateBook = () => {
               value={updateData&& updateData?.isbn || ''}
               onChange={newData}
               />
+            <div className='flex flex-col gap-2 border border-dashed border-slate-200 p-3 rounded-xl bg-slate-50/50'>
+                <label className='text-xs font-semibold text-slate-600 uppercase tracking-wide'>Modify Cover Image (Optional PNG/JPG)</label>
+                <input 
+                  type='file' 
+                  accept='.png, .jpg, .jpeg' 
+                  ref={fileInput}
+                  onChange={handlefileChange} 
+                  className='text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer' 
+                />
+                
+                {preview && (
+                  <div className="mt-1 flex items-center gap-3 bg-white p-2 rounded-lg border border-slate-100">
+                    <img src={preview} alt="Cover Preview Thumbnail" className="w-12 h-16 object-cover rounded-md border shadow-sm" />
+                    <div className="text-xs text-slate-500">
+                      <p className="font-semibold text-slate-700">Active Form Cover Image</p>
+                      <p>{file ? `New Upload: ${(file.size / 1024).toFixed(1)} KB` : "Current database file template"}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
               
             </label>
             <div className='flex gap-3'>

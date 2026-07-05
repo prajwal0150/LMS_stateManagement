@@ -87,6 +87,7 @@ const Dashboard = () => {
             <thead className='bg-gray-100'>
               <tr>
                 <td className="px-4 py-2">S.No</td>
+                 <td className="px-4 py-2">Cover</td>
                 <td className="px-4 py-2">Books Name</td>
                 <td className="px-4 py-2">Author</td>
                 <td className="px-4 py-2">Quantity</td>
@@ -104,6 +105,15 @@ const Dashboard = () => {
                                     return (
                                         <tr key={item.id || index} className="hover:bg-slate-50/80 transition-colors">
                                             <td className='px-4 py-2 font-medium '>{index + 1}</td>
+
+                                            <td className='px-4 py-2 font-semibold '>
+                                              {item.image?(<img src={item.image} 
+                                              alt="Book Image" 
+                                              className="w-10 h-14 object-cover rounded-lg shadow-sm border border-slate-200"/>)
+                                              :( <div className="w-10 h-14 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center text-[10px] text-slate-400 text-center font-medium">
+                                              No Cover
+                                                </div>)}</td>
+                                                
                                             <td className='px-4 py-2 font-semibold '>{item.title}</td>
                                             <td className='px-4 py-2 '>{item.author}</td>
                                             <td className="px-4 py-2 ">

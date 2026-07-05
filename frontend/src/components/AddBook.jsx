@@ -8,6 +8,8 @@ export default function AddBook({ onClose}) {
     const [error, setError]=useState(null);
     const dispatch=useDispatch();
     const navigate=useNavigate();
+
+    const [file , setfile]=useState(null);
     
         const getBookData = (e) => {
         setBook({
@@ -15,6 +17,23 @@ export default function AddBook({ onClose}) {
             [e.target.name]: e.target.value,
             });
             };
+    const handlefile=(e)=>{
+      if(e.target.files && e.target.files.length>0){
+        const selectedFile=(e.target.files[0]);
+
+         const imageTypes=['image/png', 'image/jpeg','image/jpg'];
+
+      if(!imageTypes.includes(selectedFile.type)){
+        setError("Invalid file format. Only PNG, JPG and JPEG are allowed");
+        setfile3(null);
+        e.target.value=null;
+        return;
+      }
+      
+     
+      setError(null);
+      setfile(selectedFile);
+    }};
 
     const titleRegex = /^[A-Za-z\s]+$/;
     const numberRegex = /^\d+$/;
@@ -44,13 +63,16 @@ export default function AddBook({ onClose}) {
               setError("Quantity must contain only numbers.");
               return;
           }
+          const formDataPayload = new FormData();
+          formDataPayload.append('title', book.title);
+          formDataPayload.append('author', book.author);
+          formDataPayload.append('isbn', book.isbn);
+          formDataPayload.append('total_copies', Number(book.total_copies));
+          formDataPayload.append('image', file); 
 
           try {
               await dispatch(
-                  addBook({
-                      ...book,
-                      total_copies: Number(book.total_copies),
-                  })
+                addBook(formDataPayload)
               ).unwrap();
 
               alert("Book added successfully.");
@@ -130,6 +152,22 @@ export default function AddBook({ onClose}) {
               name='isbn'
               onChange={getBookData}
               />
+              
+            </label>
+            <label className=''>
+              Image Upload
+              <input type='file'
+              placeholder=''
+              className='w-full bg-blue-50 p-2 roundend-lg'
+              // name='file'
+              onChange={handlefile}
+              
+              />
+             {file && (
+                <div className="mt-1 bg-green-50 border border-green-200 text-green-700 text-xs py-1.5 px-3 rounded-lg flex items-center justify-between">
+                  <span className="truncate max-w-[250px] font-medium">📄 File: {file.name}</span>
+                </div>
+              )}
               
             </label>
             <div className='flex gap-3'>

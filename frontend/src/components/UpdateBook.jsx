@@ -86,17 +86,26 @@ const UpdateBook = () => {
       return;
     }
 
-    const formDataPayload = new FormData();
-    formDataPayload.append('title', updateData.title);
-    formDataPayload.append('author', updateData.author);
-    formDataPayload.append('isbn', updateData.isbn);
-    formDataPayload.append('total_copies', Number(updateData.total_copies));
-    
-    if (file) {
-      formDataPayload.append('image', file);
-    }
+    const payload = file
+      ? (() => {
+          const formDataPayload = new FormData();
+          formDataPayload.append('title', updateData.title);
+          formDataPayload.append('author', updateData.author);
+          formDataPayload.append('isbn', updateData.isbn);
+          formDataPayload.append('total_copies', Number(updateData.total_copies));
+          formDataPayload.append('image', file);
+          return formDataPayload;
+        })()
+      : {
+          id: Number(id),
+          title: updateData.title,
+          author: updateData.author,
+          isbn: updateData.isbn,
+          total_copies: Number(updateData.total_copies),
+        };
+
     try {
-      await dispatch(updateBook({ id: Number(id), formDataPayload })).unwrap();
+      await dispatch(updateBook(file ? { id: Number(id), formDataPayload: payload } : payload)).unwrap();
       alert("Book updated successfully.");
       navigate("/Books");
     } catch (submitError) {
@@ -170,7 +179,7 @@ const UpdateBook = () => {
             </label>
             <label className=''>
               Quantity
-              <input type='text'
+              <input type='number'
               placeholder='e.g: 15'
               className='w-full bg-blue-50 p-2 rounded-lg'
               name='total_copies'
@@ -188,6 +197,7 @@ const UpdateBook = () => {
               value={updateData&& updateData?.isbn || ''}
               onChange={newData}
               />
+              </label>
             <div className='flex flex-col gap-2 border border-dashed border-slate-200 p-3 rounded-xl bg-slate-50/50'>
                 <label className='text-xs font-semibold text-slate-600 uppercase tracking-wide'>Modify Cover Image (Optional PNG/JPG)</label>
                 <input 
@@ -208,9 +218,7 @@ const UpdateBook = () => {
                   </div>
                 )}
               </div>
-              
-              
-            </label>
+
             <div className='flex gap-3'>
               <button className='flex-1 bg-green-400 h-10 rounded-2xl cursor-pointer hover:bg-green-700 hover:text-white' 
               type='submit'

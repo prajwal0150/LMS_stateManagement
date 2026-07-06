@@ -4,7 +4,12 @@ import { addBook } from '../features/Books';
 import { useNavigate } from 'react-router-dom';
 
 export default function AddBook({ onClose}) {
-    const [book, setBook]=useState({});
+    const [book, setBook]=useState({
+      title: '',
+      author: '',
+      isbn: '',
+      total_copies: '',
+    });
     const [error, setError]=useState(null);
     const dispatch=useDispatch();
     const navigate=useNavigate();
@@ -14,8 +19,7 @@ export default function AddBook({ onClose}) {
         const getBookData = (e) => {
         setBook({
             ...book,
-            [e.target.name]: e.target.value,
-            });
+            [e.target.name]: e.target.value,});
             };
     const handlefile=(e)=>{
       if(e.target.files && e.target.files.length>0){
@@ -25,7 +29,7 @@ export default function AddBook({ onClose}) {
 
       if(!imageTypes.includes(selectedFile.type)){
         setError("Invalid file format. Only PNG, JPG and JPEG are allowed");
-        setfile3(null);
+        setfile(null);
         e.target.value=null;
         return;
       }
@@ -37,48 +41,55 @@ export default function AddBook({ onClose}) {
 
     const titleRegex = /^[A-Za-z\s]+$/;
     const numberRegex = /^\d+$/;
+    
     const handleSubmit = async (e) => {
     e.preventDefault();
 
     setError(null);
 
-          if (
-              !book.title ||
-              !book.author ||
-              !book.isbn ||
-              !book.total_copies
-          ) {
+          if (!book.title ||!book.author ||!book.isbn ||!book.total_copies) {
               setError("All fields are required.");
               return;
           }
 
-          // Book title validation
+          
           if (!titleRegex.test(book.title)) {
               setError("Book title should contain only letters and spaces.");
               return;
           }
 
-          // Quantity validation
+          
           if (!numberRegex.test(book.total_copies)) {
               setError("Quantity must contain only numbers.");
               return;
           }
-          const formDataPayload = new FormData();
-          formDataPayload.append('title', book.title);
-          formDataPayload.append('author', book.author);
-          formDataPayload.append('isbn', book.isbn);
-          formDataPayload.append('total_copies', Number(book.total_copies));
-          formDataPayload.append('image', file); 
+          const payload = file
+            ? (() => {
+                const formDataPayload = new FormData();
+                formDataPayload.append('title', book.title);
+                formDataPayload.append('author', book.author);
+                formDataPayload.append('isbn', book.isbn);
+                formDataPayload.append('total_copies', Number(book.total_copies));
+                formDataPayload.append('image', file);
+                return formDataPayload;
+              })()
+            : {
+                title: book.title,
+                author: book.author,
+                isbn: book.isbn,
+                total_copies: Number(book.total_copies),
+              };
 
           try {
-              await dispatch(
-                addBook(formDataPayload)
-              ).unwrap();
+              await dispatch(addBook(payload)).unwrap();
 
               alert("Book added successfully.");
 
-              onClose();
-              // navigate("/Books");
+              if (onClose) {
+                onClose();
+              } else {
+                navigate("/Books");
+              }
 
           } catch (err) {
 
@@ -136,7 +147,7 @@ export default function AddBook({ onClose}) {
             </label>
             <label className=''>
               Quantity
-              <input type=''
+              <input type='number'
               placeholder='e.g: 15'
               className='w-full bg-blue-50 p-2 roundend-lg'
               name='total_copies'
@@ -157,6 +168,7 @@ export default function AddBook({ onClose}) {
             <label className=''>
               Image Upload
               <input type='file'
+              accept='.png, .jpg, .jpeg'
               placeholder=''
               className='w-full bg-blue-50 p-2 roundend-lg'
               // name='file'
@@ -165,7 +177,7 @@ export default function AddBook({ onClose}) {
               />
              {file && (
                 <div className="mt-1 bg-green-50 border border-green-200 text-green-700 text-xs py-1.5 px-3 rounded-lg flex items-center justify-between">
-                  <span className="truncate max-w-[250px] font-medium">📄 File: {file.name}</span>
+                  <span className="truncate max-w-64 font-medium">📄 File: {file.name}</span>
                 </div>
               )}
               

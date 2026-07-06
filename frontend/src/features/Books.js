@@ -2,6 +2,26 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const BASE_URL = "https://library-api-9h9j.onrender.com/api";
 
+const normalizeBookPayload = (payload) => {
+  const isFormData = typeof FormData !== "undefined" && payload instanceof FormData;
+
+  if (isFormData) {
+    return { body: payload, isJson: false, id: undefined };
+  }
+
+  if (payload && typeof payload === "object" && typeof FormData !== "undefined" && payload.formDataPayload instanceof FormData) {
+    return { body: payload.formDataPayload, isJson: false, id: payload.id };
+  }
+
+  const { id, formDataPayload, ...bookData } = payload ?? {};
+
+  return {
+    body: JSON.stringify(bookData),
+    isJson: true,
+    id,
+  };
+};
+
 // show book
 export const showBooks = createAsyncThunk("showBooks",async (_, { rejectWithValue }) => {
     try {
@@ -23,15 +43,15 @@ export const showBooks = createAsyncThunk("showBooks",async (_, { rejectWithValu
 export const addBook = createAsyncThunk("books/addBook",async (formDataPayload, { getState, rejectWithValue }) => {
     try {
       const token = getState().auth.token;
+      const { body, isJson } = normalizeBookPayload(formDataPayload);
 
       const response = await fetch(`${BASE_URL}/books/`, {
         method: "POST",
         headers: {
-          // "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          ...(isJson ? { "Content-Type": "application/json" } : {}),
         },
-        // body: JSON.stringify(data),
-        body:formDataPayload,
+        body,
       });
 
       const result = await response.json();
@@ -72,20 +92,22 @@ export const deleteBook = createAsyncThunk("deleteBook",async (bookId, { getStat
 );
 
 // update book
-export const updateBook = createAsyncThunk("updateBook",async ({id,formDataPayload}, { getState, rejectWithValue }) => {
+export const updateBook = createAsyncThunk("updateBook",async (payload, { getState, rejectWithValue }) => {
     try {
       const token = getState().auth.token;
+      const normalizedPayload = normalizeBookPayload(payload);
 
-      // const bookId = bookData.id;
+      if (!normalizedPayload.id && normalizedPayload.id !== 0) {
+        throw new Error("Book id is required");
+      }
 
-      const response = await fetch(`${BASE_URL}/books/${id}/`, {
+      const response = await fetch(`${BASE_URL}/books/${normalizedPayload.id}/`, {
         method: "PATCH",
         headers: {
-          // "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          ...(normalizedPayload.isJson ? { "Content-Type": "application/json" } : {}),
         },
-        // body: JSON.stringify(bookData),
-        body:formDataPayload,
+        body: normalizedPayload.body,
       });
 
       const result = await response.json();
